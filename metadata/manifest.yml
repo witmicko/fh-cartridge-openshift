@@ -8,7 +8,7 @@ Versions:
 - '0.10'
 License: MIT License
 License-Url: https://raw.github.com/joyent/node/v0.10/LICENSE
-Vendor: www.redhat.com
+Vendor: www.feedhenry.com
 Website: http://www.feedhenry.com/
 Cartridge-Version: 0.0.22
 Compatible-Versions:
@@ -18,7 +18,7 @@ Compatible-Versions:
 - 0.0.19
 - 0.0.20
 - 0.0.21
-Cartridge-Vendor: redhat
+Cartridge-Vendor: feedhenry
 Categories:
 - embedded
 - administration
