@@ -1,4 +1,5 @@
 #!/bin/bash -e
+echo "Making feedhenry cartridge"
 
 case "$1" in
   -v|--version)
