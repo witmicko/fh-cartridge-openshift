@@ -32,44 +32,7 @@ function start() {
   #  Source environment if it exists.
   [ -f "$envf" ]  &&  source "$envf"
 
-  #  Ensure we have script file.
-  node_app=${node_app:-"server.js"}
-
-  pushd "${OPENSHIFT_FEEDHENRY_DIR}/lib/" > /dev/null
-  echo "`date +"$FMT"`: Starting application '$OPENSHIFT_APP_NAME' ..."
-  if [ ! -f "${OPENSHIFT_FEEDHENRY_DIR}/lib/package.json" ]; then
-      echo "    Script       = $node_app"
-      echo "    Script Args  = $node_app_args"
-      echo "    Node Options = $node_opts"
-  fi
-
-
-  if [ -f "${OPENSHIFT_FEEDHENRY_DIR}/lib/package.json" ]; then
-      supervisor_opts="$(get_main_script_from_package_json)"
-      node_cmd="npm start -d"
-  else
-      #  Backward compatibility for apps without package.json
-      print_missing_package_json_warning
-      supervisor_opts="$node_opts $node_app $node_app_args"
-      node_cmd="node $node_opts $node_app $node_app_args"
-  fi
-
-  if use_npm; then
-    echo "*** NodeJS supervisor is disabled due to .openshift/markers/use_npm"
-    echo "*** Starting application using: $node_cmd"
-    nodejs_context "nohup $node_cmd |& /usr/bin/logshifter -tag nodejs &"
-  else
-    # Users are allowed to use OPENSHIFT_NODEJS_WATCH env to specify
-    # comma-delimited list of folders or js files to watch for changes.
-    #
-    if [ -n "$OPENSHIFT_NODEJS_WATCH" ]; then
-      supervisor_watch_opts="--watch ${OPENSHIFT_NODEJS_WATCH}"
-    else
-      echo "//$(date +%s)" > ${OPENSHIFT_NODEJS_WATCHDIR}/watcher.js
-      supervisor_watch_opts="--watch ${OPENSHIFT_NODEJS_WATCHDIR}"
-    fi
-    nodejs_context "nohup supervisor -e 'node|js|coffee' -p ${OPENSHIFT_NODEJS_POLL_INTERVAL:-10000} ${supervisor_watch_opts} -- $supervisor_opts |& /usr/bin/logshifter -tag nodejs &"
-  fi
+  node "${OPENSHIFT_FEEDHENRY_DIR}"/lib/server.js
 
   retries=3
   while [ $retries -gt 0 ]; do
@@ -84,9 +47,9 @@ function start() {
 
   popd > /dev/null
   if [ -n "${cart_pid}" ]; then
-      echo "$cart_pid" > "$OPENSHIFT_NODEJS_PID_DIR/cartridge.pid"
+      echo "$cart_pid" > "$OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid"
   else
-      echo "Application '$OPENSHIFT_APP_NAME' failed to start" 1>&2 1
+      echo "FeedHenry reporter for '$OPENSHIFT_APP_NAME' failed to start" 1>&2 1
   fi
 }
 
@@ -94,7 +57,7 @@ function stop() {
     echo "Stopping FeedHenry cartridge"
 
     if cartridge_pidfile_exists; then
-      cart_pid=$(cat $OPENSHIFT_NODEJS_PID_DIR/cartridge.pid)
+      cart_pid=$(cat $OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid)
       running_cart_pid=$(cartridge_pid)
 
       if ! is_cartridge_running; then
@@ -150,95 +113,21 @@ function stop() {
 }
 
 function restart() {
-    is_cartridge_running && stop
+  if (stop); then
     start
+  else
+    start
+  fi
 }
 
 function build() {
-    echo "Building NodeJS cartridge"
-    node_modules_dir="${OPENSHIFT_FEEDHENRY_DIR}/lib/node_modules/"
-    saved_modules_dir="${OPENSHIFT_NODEJS_DIR}/tmp/saved.node_modules"
-
-    # Ensure that we have the node_modules directory.
-    mkdir -p $node_modules_dir
-
-    if force_clean_build_enabled_for_latest_deployment; then
-        echo "Force-clean builds are enabled. Recreating npm modules" 1>&2
-
-        # Remove saved modules, if any.
-        rm -rf $saved_modules_dir
-
-        # Clean the npm cache. (This will clean the ~/.npm directory).
-        npm cache clean
-
-        # Link back the global modules.
-        link_global_modules $OPENSHIFT_NODEJS_VERSION
-    else
-        # Restore the saved node_modules from prior builds.
-        if [ -d "${OPENSHIFT_NODEJS_DIR}/tmp/saved.node_modules" ]; then
-            for d in `ls -a ${OPENSHIFT_NODEJS_DIR}/tmp/saved.node_modules`; do
-                [ -e "${node_modules_dir}$d" ]  ||  \
-                  mv "${OPENSHIFT_NODEJS_DIR}/tmp/saved.node_modules/$d" "$node_modules_dir"
-            done
-            rm -rf "${OPENSHIFT_NODEJS_DIR}/tmp/saved.node_modules"
-        fi
-    fi
-
-    #  Newer versions of Node set tmp to $HOME/tmp, which is not available
-    nodejs_context "npm config set tmp $OPENSHIFT_TMP_DIR"
-
-    # FIXME: Remove this line once we update NPM to latest version
-    nodejs_context 'npm config set ca ""'
-
-    if [ -f "${OPENSHIFT_FEEDHENRY_DIR}/lib"/deplist.txt ]; then
-        mods=$(perl -ne 'print if /^\s*[^#\s]/' "${OPENSHIFT_REPO_DIR}"/deplist.txt)
-        [ -n "$mods" ]  &&  print_deprecation_warning
-        for m in $mods; do
-            echo "Checking npm module: $m"
-            echo
-            if is_node_module_installed "$m"; then
-                (cd "${OPENSHIFT_NODEJS_DIR}"; nodejs_context "npm update '$m'")
-            else
-                (cd "${OPENSHIFT_NODEJS_DIR}"; nodejs_context "npm install '$m'")
-            fi
-        done
-    fi
-
-    # Workaround for failure in npm install when a package in package.json
-    # points to a git commit.
-    # This issue occurs because we are running in the context of a
-    # git post receive-hook
-    unset GIT_DIR
-    unset GIT_WORK_TREE
-
-    nodejs_context /bin/bash
-    if [ -f "${OPENSHIFT_FEEDHENRY_DIR}/lib"/package.json ]; then
-        (cd "${OPENSHIFT_FEEDHENRY_DIR}/lib"; nodejs_context "npm install -d")
-    fi
+    echo
 }
 
 
 
 function post-deploy() {
-    if hot_deploy_enabled_for_latest_deployment; then
-      if use_npm; then
-        restart
-      else
-        #
-        # Check if supervisor is already running. If not do a restart.
-        # If it is running, update the watcher.js to tell nodejs to restart
-        # the node processes.
-        #
-        if is_supervisor_running; then
-          if [[ -z ${OPENSHIFT_NODEJS_WATCH} ]]; then
-            echo "//$(date +%s)" > ${OPENSHIFT_NODEJS_WATCHDIR}/watcher.js
-          fi
-        else
-          echo "Restarting NodeJS supervisor."
-          restart
-        fi
-      fi
-    fi
+    echo
 }
 
 function pre-repo-archive() {
@@ -253,12 +142,9 @@ function pre-repo-archive() {
     fi
 }
 
-# Clean up any log files
+
 function tidy() {
-  client_message "Emptying nodejs logs in dir: $OPENSHIFT_LOG_DIR"
-  shopt -s dotglob
-  rm -rf $OPENSHIFT_LOG_DIR/nodejs.log*
-  rm -rf ${OPENSHIFT_NODEJS_DIR}tmp/*
+    echo
 }
 
 #
