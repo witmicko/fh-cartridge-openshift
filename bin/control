@@ -2,8 +2,8 @@
 
 # Source utility functions.
 source $OPENSHIFT_CARTRIDGE_SDK_BASH
-source "${OPENSHIFT_NODEJS_DIR}/lib/util"
-source "${OPENSHIFT_NODEJS_DIR}/lib/nodejs_context"
+source "${OPENSHIFT_FEEDHENRY_DIR}/lib/util"
+source "${OPENSHIFT_FEEDHENRY_DIR}/lib/nodejs_context"
 
 STOPTIMEOUT=10
 FMT="%a %b %d %Y %H:%M:%S GMT%z (%Z)"
@@ -20,7 +20,7 @@ function status() {
 }  #  End of function  status.
 
 function start() {
-  echo "Starting FeedHenry cartridge"
+  echo "Starting FeedHenry reporter"
 
   if is_cartridge_running; then
     echo "Application is already running"
@@ -35,16 +35,16 @@ function start() {
   #  Ensure we have script file.
   node_app=${node_app:-"server.js"}
 
-  pushd "$OPENSHIFT_REPO_DIR" > /dev/null
+  pushd "${OPENSHIFT_FEEDHENRY_DIR}/lib/" > /dev/null
   echo "`date +"$FMT"`: Starting application '$OPENSHIFT_APP_NAME' ..."
-  if [ ! -f "$OPENSHIFT_REPO_DIR/package.json" ]; then
+  if [ ! -f "${OPENSHIFT_FEEDHENRY_DIR}/lib/package.json" ]; then
       echo "    Script       = $node_app"
       echo "    Script Args  = $node_app_args"
       echo "    Node Options = $node_opts"
   fi
 
 
-  if [ -f "${OPENSHIFT_REPO_DIR}package.json" ]; then
+  if [ -f "${OPENSHIFT_FEEDHENRY_DIR}/lib/package.json" ]; then
       supervisor_opts="$(get_main_script_from_package_json)"
       node_cmd="npm start -d"
   else
@@ -156,7 +156,7 @@ function restart() {
 
 function build() {
     echo "Building NodeJS cartridge"
-    node_modules_dir="${OPENSHIFT_REPO_DIR}node_modules/"
+    node_modules_dir="${OPENSHIFT_FEEDHENRY_DIR}/lib/node_modules/"
     saved_modules_dir="${OPENSHIFT_NODEJS_DIR}/tmp/saved.node_modules"
 
     # Ensure that we have the node_modules directory.
@@ -190,7 +190,7 @@ function build() {
     # FIXME: Remove this line once we update NPM to latest version
     nodejs_context 'npm config set ca ""'
 
-    if [ -f "${OPENSHIFT_REPO_DIR}"/deplist.txt ]; then
+    if [ -f "${OPENSHIFT_FEEDHENRY_DIR}/lib"/deplist.txt ]; then
         mods=$(perl -ne 'print if /^\s*[^#\s]/' "${OPENSHIFT_REPO_DIR}"/deplist.txt)
         [ -n "$mods" ]  &&  print_deprecation_warning
         for m in $mods; do
@@ -212,8 +212,8 @@ function build() {
     unset GIT_WORK_TREE
 
     nodejs_context /bin/bash
-    if [ -f "${OPENSHIFT_REPO_DIR}"/package.json ]; then
-        (cd "${OPENSHIFT_REPO_DIR}"; nodejs_context "npm install -d")
+    if [ -f "${OPENSHIFT_FEEDHENRY_DIR}/lib"/package.json ]; then
+        (cd "${OPENSHIFT_FEEDHENRY_DIR}/lib"; nodejs_context "npm install -d")
     fi
 }
 
