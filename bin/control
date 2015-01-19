@@ -8,9 +8,6 @@ source "${OPENSHIFT_FEEDHENRY_DIR}/lib/nodejs_context"
 STOPTIMEOUT=10
 FMT="%a %b %d %Y %H:%M:%S GMT%z (%Z)"
 
-OPENSHIFT_NODEJS_WATCHDIR="${OPENSHIFT_DATA_DIR}.nodewatch"
-mkdir -p ${OPENSHIFT_NODEJS_WATCHDIR}
-
 function status() {
   if is_cartridge_running; then
     client_result "Application is running"
@@ -26,11 +23,6 @@ function start() {
     echo "Application is already running"
     return 0
   fi
-
-  envf="$OPENSHIFT_NODEJS_DIR/configuration/node.env"
-
-  #  Source environment if it exists.
-  [ -f "$envf" ]  &&  source "$envf"
 
   node "${OPENSHIFT_FEEDHENRY_DIR}"/lib/server.js
 
