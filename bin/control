@@ -24,7 +24,7 @@ function start() {
     return 0
   fi
 
-  node "${OPENSHIFT_FEEDHENRY_DIR}"/lib/server.js
+  node "${OPENSHIFT_FEEDHENRY_DIR}"/lib/server.js &
 
   retries=3
   while [ $retries -gt 0 ]; do
