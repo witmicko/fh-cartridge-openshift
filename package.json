@@ -1,0 +1,24 @@
+{
+  "name": "feedhenry-cartridge",
+  "version": "1.0.0",
+  "description": "This cartridge is documented in the [Cartridge Guide](http://openshift.github.io/documentation/oo_cartridge_guide.html#nodejs).",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cianclarke/feedhenry-cartridge.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cianclarke/feedhenry-cartridge/issues"
+  },
+  "homepage": "https://github.com/cianclarke/feedhenry-cartridge",
+  "dependencies": {
+    "async": "^0.9.0",
+    "underscore": "^1.7.0"
+  }
+}

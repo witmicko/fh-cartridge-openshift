@@ -24,7 +24,7 @@ function start() {
     return 0
   fi
 
-  node "${OPENSHIFT_FEEDHENRY_DIR}"/lib/server.js &
+  node "${OPENSHIFT_FEEDHENRY_DIR}"/server.js &
 
   retries=3
   while [ $retries -gt 0 ]; do
@@ -37,7 +37,7 @@ function start() {
   # ensure file is created before printing it to show startup status
   sleep 2
 
-  popd > /dev/null
+  
   if [ -n "${cart_pid}" ]; then
       echo "$cart_pid" > "$OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid"
   else

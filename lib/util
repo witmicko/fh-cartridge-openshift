@@ -3,21 +3,6 @@
 
 source $OPENSHIFT_CARTRIDGE_SDK_BASH
 
-function wait_for_stop {
-  pid=$1
-  for i in {1..300}
-  do
-    if `ps --pid $pid > /dev/null 2>&1`
-    then
-      # only print every second
-      [ $((100 % 10)) -eq 0 ] && echo "Waiting for stop to finish"
-      sleep .1
-    else
-      break
-    fi
-  done
-}
-
 function set-configuration {
   version="$1"
   type="${2:-native}"
@@ -43,60 +28,6 @@ function set-configuration {
       echo -n "${OPENSHIFT_REPO_DIR}node_modules/.bin/:${OPENSHIFT_HOMEDIR}/.node_modules/.bin" > $OPENSHIFT_NODEJS_DIR/env/OPENSHIFT_NODEJS_PATH_ELEMENT
       ;;
   esac
-}
-
-function parse_args {
-  while :
-  do
-    case $1 in
-      -h | --help | -\?)
-        echo "usage: $0 [--version[=]<value>]"
-        exit 0
-        ;;
-      -v | --version)
-        version=$2     # You might want to check if you really got VERSION
-        shift 2
-        ;;
-      --version=*)
-        version=${1#*=}        # Delete everything up till "="
-        shift
-        ;;
-      --) # End of all options
-        shift
-        break
-        ;;
-      -*)
-        echo "WARN: Unknown option... Exiting: $1" >&2
-        exit 1
-        ;;
-      *)  # no more options. Stop while loop
-        break
-        ;;
-    esac
-  done
-}
-
-function link_global_modules {
-  OPENSHIFT_NODEJS_VERSION=$1
-  pushd $OPENSHIFT_NODEJS_DIR > /dev/null
-    # Global modules good to have
-    npmgl=$(grep "^\s*[^#\s]" $OPENSHIFT_NODEJS_DIR/versions/$OPENSHIFT_NODEJS_VERSION/configuration/npm_global_module_list | sort -u)
-
-    # Available global modules; only match top-level npm packages
-    global_modules=$(nodejs_context "npm ls -g 2> /dev/null" | perl -ne 'print "$1\n" if /^\S+\s(\S+)\@[\d\.-]+/' | sort -u)
-
-    # List all modules in common
-    module_list=$(comm -12 <(echo "${global_modules}") <(echo "${npmgl}") | tr '\n' ' ')
-
-    # Link the modules
-    nodejs_context "npm link $module_list &> /dev/null"
-  popd > /dev/null
-}
-
-# Check if the 'use_npm' marker is present
-#
-function use_npm() {
-  [ -f ${OPENSHIFT_REPO_DIR}.openshift/markers/use_npm ]
 }
 
 # This is the full path for supervisor in its SCL context
@@ -145,12 +76,12 @@ function cartridge_pid() {
 # if it does not exist, look for the node or supervisor process 
 # and recreate the pidfile if the process exists
 function cartridge_pidfile_exists() {
-  if [ -f "$OPENSHIFT_NODEJS_PID_DIR/cartridge.pid" ]; then
+  if [ -f "$OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid" ]; then
     return 0
   else
     cart_pid=$(cartridge_pid)
     if [ -n "${cart_pid}" ]; then
-      echo ${cart_pid} > $OPENSHIFT_NODEJS_PID_DIR/cartridge.pid
+      echo ${cart_pid} > $OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid
       return 0
     else
       return 1
@@ -161,7 +92,7 @@ function cartridge_pidfile_exists() {
 function is_node_running() {
     cartridge_pidfile_exists || return 1
 
-    nodepid=$(cat "${OPENSHIFT_NODEJS_PID_DIR}/cartridge.pid")
+    nodepid=$(cat "${OPENSHIFT_FEEDHENRY_PID_DIR}/cartridge.pid")
     [ -n "$nodepid" ]  ||  return 1
 
     node_command=$(ps --no-heading -ocmd -p $nodepid | sed -e 's#//#/#g')
@@ -177,7 +108,7 @@ function is_node_running() {
 function is_supervisor_running() {
     cartridge_pidfile_exists || return 1
 
-    nodepid=$(cat "${OPENSHIFT_NODEJS_PID_DIR}/cartridge.pid")
+    nodepid=$(cat "${OPENSHIFT_FEEDHENRY_PID_DIR}/cartridge.pid")
     [ -n "$nodepid" ]  ||  return 1
 
     #  Is the pid a supervisor process.
@@ -192,62 +123,5 @@ function is_supervisor_running() {
 function is_cartridge_running() {
   is_supervisor_running || is_node_running
 }
-
-function print_missing_package_json_warning() {
-       cat <<DEPRECATED
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  It is highly recommended that you add a package.json
-  file to your application.
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-DEPRECATED
-}
-
-function print_deprecation_warning() {
-       cat <<DEPRECATED
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  The use of deplist.txt is being deprecated and will soon
-  go away. For the short term, we will continue to support
-  installing the Node modules specified in the deplist.txt
-  file. But please be aware that this will soon go away.
-
-  It is highly recommended that you use the package.json
-  file to specify dependencies on other Node modules.
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-DEPRECATED
-}
-
-function is_node_module_installed() {
-    module_name=${1:-""}
-    if [ -n "$module_name" ]; then
-        pushd "$OPENSHIFT_NODEJS_DIR" > /dev/null
-        if [ -d $m ] ; then
-            popd > /dev/null
-            return 0
-        fi
-        popd > /dev/null
-    fi
-
-    return 1
-}
-
-function get_main_script_from_package_json() {
-    nodejs_context "node" <<NODE_EOF
-try {
-  var zmain = require('$OPENSHIFT_REPO_DIR/package.json').main;
-  if (typeof zmain === 'undefined') {
-    console.log('server.js');
-  }
-  else {
-    console.log(zmain);
-  }
-} catch(ex) {
-  console.log('server.js');
-}
-NODE_EOF
-
-}  #  End of function  get_main_script_from_package_json.
-
 
 # vim: ft=sh
