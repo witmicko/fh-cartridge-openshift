@@ -5,6 +5,13 @@ source $OPENSHIFT_CARTRIDGE_SDK_BASH
 echo "Installing feedhenry reporting cartridge deps..."
 if [ -f "${OPENSHIFT_FEEDHENRY_DIR}"/package.json ]; then
   (cd "${OPENSHIFT_FEEDHENRY_DIR}"; npm install -d)
-fi  
+fi
+
+# Create run directory
+pushd $OPENSHIFT_FEEDHENRY_DIR > /dev/null
+mkdir -p run
+popd > /dev/null
+
+
 
 client_result "FeedHenry reporting cartridge set up"

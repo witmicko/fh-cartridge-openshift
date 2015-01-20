@@ -1,13 +1,19 @@
-var http = require('http'),
-logs = require('./lib/logs');
+var express = require('express'),
+logs = require('./lib/logs'),
+app = express();
 
-http.createServer(function (req, res) {
+app.get('/sys/reporter/logs', function (req, res) {
   logs(function(err, logResult){
     if (err){
-      res.writeHead(500, {'Content-Type': 'text/plain'});
-      return res.end('error');    
+      return res.status(500).json(err);
     }
+    return res.json(logResult);
   });
-  res.writeHead(200, {'Content-Type': 'application/json'});
-  return res.end(JSON.stringify(logResult));
-}).listen(process.env.OPENSHIFT_FEEDHENRY_PORT, process.env.OPENSHIFT_FEEDHENRY_IP);
+  
+});
+
+app.get('/sys/reporter/ping', function(req, res){
+  return res.json({ok : true});
+});
+
+app.listen(process.env.OPENSHIFT_FEEDHENRY_PORT, process.env.OPENSHIFT_FEEDHENRY_IP);

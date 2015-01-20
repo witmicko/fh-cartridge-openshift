@@ -51,6 +51,6 @@ Endpoints:
   Protocols:
   - http
   Mappings:
-  - Frontend: /feedhenry
-    Backend: /feedhenry
+  - Frontend: /sys/reporter
+    Backend: /sys/reporter
 Install-Build-Required: false
