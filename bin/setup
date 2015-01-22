@@ -9,7 +9,7 @@ fi
 
 # Create run directory
 pushd $OPENSHIFT_FEEDHENRY_DIR > /dev/null
-mkdir -p run
+mkdir -p run tmp
 popd > /dev/null
 
 
