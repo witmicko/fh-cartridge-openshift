@@ -1,2 +1,9 @@
-# OpenShift NodeJS Cartridge
-This cartridge is documented in the [Cartridge Guide](http://openshift.github.io/documentation/oo_cartridge_guide.html#nodejs).
+#FeedHenry OpenShift Reporting Cartridge
+
+Handles reporting information back to the FeedHenry platform, gathering information on 
+
+* Stats
+* Analytics
+* Notifications
+* Logs
+
