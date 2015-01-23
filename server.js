@@ -8,7 +8,7 @@ udpserver = dgram.createSocket('udp4');
 
 app.use(auth);
 app.use('/sys/reporter/reports', routes.reports);
-app.get('/sys/reporter/logs', routes.logs);
+app.use('/sys/reporter/logs', routes.logs);
 app.get('/sys/reporter/ping', routes.ping);
 app.get('/sys/reporter/stats', routes.stats.list);
 app.use('/sys/reporter/notifications', routes.notifications);
