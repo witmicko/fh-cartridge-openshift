@@ -1,14 +1,16 @@
 var reports = require('../lib/reports');
 var express = require('express');
 var reportsRoute = new express.Router();
-
+var bodyParser = require('body-parser');
+var cors = require('cors');
+reportsRoute.use(cors());
+reportsRoute.use(bodyParser());
 reportsRoute.get('/', function(req, res){
   reports.list(function(err, reportingResult){
-    if (err){
-      return res.status(500).json(err);
+    if (err || !reportingResult){
+      return res.status(500).json(err || 'No reports found');
     }
-    // TODO Return JSON array here instead
-    return res.end(reportingResult);
+    return res.json(reportingResult);
   });
 });
 
@@ -19,7 +21,7 @@ reportsRoute.post('/', function(req, res){
       return res.status(500).json(err);
     }
     
-    return res.end(createResult);
+    return res.json(createResult);
   });
 });
 

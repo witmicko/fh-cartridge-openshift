@@ -1,4 +1,5 @@
 module.exports = {
   logs : require('./logs.js'),
-  reports : require('./reports.js')
+  reports : require('./reports.js'),
+  stats : require('./stats.js')
 };
