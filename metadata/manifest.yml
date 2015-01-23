@@ -48,9 +48,11 @@ Endpoints:
   Private-Port-Name: PORT
   Private-Port: 8081
   Public-Port-Name: PROXY_PORT
-  Private-IP-Name: IP_REPORTER
-  Private-Port-Name: PORT_REPORTER
-  Private-Port: 15151
+- Private-IP-Name:   REPORTER_HOST
+  Private-Port-Name: REPORTER_PORT
+  Private-Port:      26380
+  Public-Port-Name:  REPORTER_PROXY_PORT
+
   Protocols:
   - http
   Mappings:
