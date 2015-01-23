@@ -53,10 +53,10 @@ function stop() {
       running_cart_pid=$(cartridge_pid)
 
       if ! is_cartridge_running; then
-        echo "Warning: Application '${OPENSHIFT_APP_NAME}' is currently not running."
+        echo "Warning: FeedHenry cartridge is currently not running."
       fi
 
-      echo "`date +"$FMT"`: Stopping application '$OPENSHIFT_APP_NAME' ..."
+      echo "`date +"$FMT"`: Stopping FeedHenry reporter ..."
 
       /bin/kill $cart_pid
       ret=$?
@@ -82,24 +82,9 @@ function stop() {
         fi
       fi
 
-      # Kill remaining 'node' processes.
-      # When running under 'use_npm', the npm will ignore the 'kill' calls above
-      # and keep running. Killing all node processes will put 'npm' down.
-      #
-      if [ -n "$(node_pid)" ]; then
-        kill $(node_pid)
-      fi
-
-      if is_cartridge_running ; then
-        echo "Warning: Application '$OPENSHIFT_APP_NAME' unable to stop. Use force-stop to kill."
-      else
-        echo "`date +"$FMT"`: Stopped Node application '$OPENSHIFT_APP_NAME'"
-        rm -f $OPENSHIFT_NODEJS_PID_DIR/cartridge.pid
-      fi
-
     else
       if [ -n "$(cartridge_pid)" ]; then
-        echo "Warning: Application '$OPENSHIFT_APP_NAME' exists without a pid file.  Use force-stop to kill."
+        echo "Warning: FeedHenry reporter exists without a pid file.  Use force-stop to kill."
       fi
     fi
 }
@@ -123,13 +108,13 @@ function post-deploy() {
 }
 
 function pre-repo-archive() {
-    rm -rf ${OPENSHIFT_NODEJS_DIR}/tmp/{node_modules,saved.node_modules}
+    rm -rf ${OPENSHIFT_FEEDHENRY_DIR}/tmp/{node_modules,saved.node_modules}
 
     # If the node_modules/ directory exists, then "stash" it away for redeploy.
-    node_modules_dir="${OPENSHIFT_REPO_DIR}node_modules"
+    node_modules_dir="${OPENSHIFT_FEEDHENRY_DIR}node_modules"
     if [ -d "$node_modules_dir" ]; then
       echo 'Saving away previously installed Node modules'
-      mv "$node_modules_dir" "${OPENSHIFT_NODEJS_DIR}/tmp/saved.node_modules"
+      mv "$node_modules_dir" "${OPENSHIFT_FEEDHENRY_DIR}/tmp/saved.node_modules"
       mkdir -p "$node_modules_dir"
     fi
 }

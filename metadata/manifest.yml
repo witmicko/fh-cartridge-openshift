@@ -44,11 +44,7 @@ Subscribes:
     Type: NET_TCP:db:postgres
     Required: false
 Endpoints:
-- Private-IP-Name: IP
-  Private-Port-Name: PORT
-  Private-Port: 8081
-  Public-Port-Name: PROXY_PORT
-- Private-IP-Name:   REPORTER_HOST
+- Private-IP-Name:   REPORTER_IP
   Private-Port-Name: REPORTER_PORT
   Private-Port:      26380
   Public-Port-Name:  REPORTER_PROXY_PORT
