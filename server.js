@@ -2,6 +2,7 @@ var express = require('express'),
 routes = require('./routes/index'),
 app = express(),
 dgram = require('dgram'),
+reportingAgent = require('./lib/agent'),
 udpserver = dgram.createSocket('udp4');
 
 app.use('/sys/reporter/reports', routes.reports);
@@ -19,3 +20,8 @@ udpserver.on('listening', function () {
   var a = udpserver.address();
   console.log('FeedHenry Reporter listening for UDP datagrams on ' + a.address + ":" + a.port);
 });
+
+// Send data back to supercore periodically
+setInterval(function(){
+  reportingAgent(function(){});
+}, 10000);
