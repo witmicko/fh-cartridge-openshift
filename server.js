@@ -8,7 +8,7 @@ app.use('/sys/reporter/reports', routes.reports);
 app.get('/sys/reporter/logs', routes.logs);
 app.get('/sys/reporter/ping', routes.ping);
 app.get('/sys/reporter/stats', routes.stats.list);
-app.get('/sys/reporter/notifications', routes.notifications);
+app.use('/sys/reporter/notifications', routes.notifications);
 udpserver.on('message', routes.stats.create);
 
 // Bind the TCP and UDP listeners

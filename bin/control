@@ -40,13 +40,17 @@ function start() {
   
   if [ -n "${cart_pid}" ]; then
       echo "$cart_pid" > "$OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid"
+      notify "START";
   else
       echo "FeedHenry reporter for '$OPENSHIFT_APP_NAME' failed to start" 1>&2 1
+      # This CURL will likely fail.. Better option here?
+      notify "START_FAILED";
   fi
 }
 
 function stop() {
     echo "Stopping FeedHenry cartridge"
+    notify "STOP";
 
     if cartridge_pidfile_exists; then
       cart_pid=$(cat $OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid)
@@ -122,6 +126,10 @@ function pre-repo-archive() {
 
 function tidy() {
     echo
+}
+
+function notify(){
+  curl "http://$OPENSHIFT_FEEDHENRY_REPORTER_IP:$OPENSHIFT_FEEDHENRY_REPORTER_PORT/sys/reporter/notifications" -H "X-FH-AUTH-APP: $FH_APP_API_KEY" -H 'Content-Type: application/json' --data-binary $"{ \"type\" : \"$1\"}"
 }
 
 #
