@@ -2,9 +2,11 @@ var express = require('express'),
 routes = require('./routes/index'),
 app = express(),
 dgram = require('dgram'),
+auth = require('./lib/auth'),
 reportingAgent = require('./lib/agent'),
 udpserver = dgram.createSocket('udp4');
 
+app.use(auth);
 app.use('/sys/reporter/reports', routes.reports);
 app.get('/sys/reporter/logs', routes.logs);
 app.get('/sys/reporter/ping', routes.ping);
