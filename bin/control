@@ -40,17 +40,15 @@ function start() {
   
   if [ -n "${cart_pid}" ]; then
       echo "$cart_pid" > "$OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid"
-      notify "START";
   else
       echo "FeedHenry reporter for '$OPENSHIFT_APP_NAME' failed to start" 1>&2 1
       # This CURL will likely fail.. Better option here?
-      notify "START_FAILED";
+      notify "DYNOMAN_DYNO_START_SUCCEEDED";
   fi
 }
 
 function stop() {
     echo "Stopping FeedHenry cartridge"
-    notify "STOP";
 
     if cartridge_pidfile_exists; then
       cart_pid=$(cat $OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid)
@@ -85,7 +83,7 @@ function stop() {
           pkill -f "${node}" 2>&1 || :
         fi
       fi
-
+      notify "DYNOMAN_DYNO_STOP_SUCCEEDED";
     else
       if [ -n "$(cartridge_pid)" ]; then
         echo "Warning: FeedHenry reporter exists without a pid file.  Use force-stop to kill."

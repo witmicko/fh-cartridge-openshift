@@ -5,17 +5,23 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 reportsRoute.use(cors());
 reportsRoute.use(bodyParser());
-reportsRoute.get('/', function(req, res){
+reportsRoute.get('/', listReports);
+reportsRoute.post('/', createReport);
+reportsRoute.post('/:topic', createReport);
+
+function listReports(req, res){
   reports.list(function(err, reportingResult){
     if (err || !reportingResult){
       return res.status(500).json(err || 'No reports found');
     }
     return res.json(reportingResult);
   });
-});
+}
 
-reportsRoute.post('/', function(req, res){
+function createReport(req, res){
   var report = req.body;
+  
+  report.topic = req.param('topic');
   reports.create(report, function(err, createResult){
     if (err){
       return res.status(500).json(err);
@@ -23,6 +29,6 @@ reportsRoute.post('/', function(req, res){
     
     return res.json(createResult);
   });
-});
+}
 
 module.exports = reportsRoute;
