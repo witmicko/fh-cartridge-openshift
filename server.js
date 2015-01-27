@@ -6,13 +6,16 @@ auth = require('./lib/auth'),
 reportingAgent = require('./lib/agent'),
 udpserver = dgram.createSocket('udp4');
 
-app.use(auth);
-app.use('/sys/reporter/reports', routes.reports);
-app.use('/sys/reporter/logs', routes.logs);
-app.get('/sys/reporter/ping', routes.ping);
-app.get('/sys/reporter/stats', routes.stats.list);
-app.use('/sys/reporter/notifications', routes.notifications);
+// Internal routes only
+app.use('/sys/admin/reports', routes.reports);
+app.get('/sys/admin/ping', routes.ping);
+app.get('/sys/admin/stats', routes.stats.list);
+app.use('/sys/admin/notifications', routes.notifications);
 udpserver.on('message', routes.stats.create);
+
+// Authenticated & external routes
+app.use(auth);
+app.use('/sys/reporter/logs', routes.logs);
 
 // Bind the TCP and UDP listeners
 app.listen(process.env.OPENSHIFT_FEEDHENRY_REPORTER_PORT, process.env.OPENSHIFT_FEEDHENRY_REPORTER_IP);

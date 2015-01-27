@@ -127,7 +127,7 @@ function tidy() {
 }
 
 function notify(){
-  curl "http://$OPENSHIFT_FEEDHENRY_REPORTER_IP:$OPENSHIFT_FEEDHENRY_REPORTER_PORT/sys/reporter/notifications" -H "X-FH-AUTH-APP: $FH_APP_API_KEY" -H 'Content-Type: application/json' --data-binary $"{ \"type\" : \"$1\"}"
+  curl "http://$OPENSHIFT_FEEDHENRY_REPORTER_IP:$OPENSHIFT_FEEDHENRY_REPORTER_PORT/sys/admin/notifications" -H "X-FH-AUTH-APP: $FH_APP_API_KEY" -H 'Content-Type: application/json' --data-binary $"{ \"type\" : \"$1\"}"
 }
 
 #
