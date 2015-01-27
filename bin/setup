@@ -10,6 +10,7 @@ fi
 # Create run directory
 pushd $OPENSHIFT_FEEDHENRY_DIR > /dev/null
 mkdir -p run tmp
+ln -s `which node` fhnodejs
 popd > /dev/null
 
 

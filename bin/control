@@ -23,8 +23,8 @@ function start() {
     echo "Application is already running"
     return 0
   fi
-
-  node "${OPENSHIFT_FEEDHENRY_DIR}"/server.js &
+  
+  ./fhnodejs "${OPENSHIFT_FEEDHENRY_DIR}"/server.js &
 
   retries=3
   while [ $retries -gt 0 ]; do
