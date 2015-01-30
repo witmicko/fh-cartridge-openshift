@@ -1,15 +1,8 @@
 var stats = require('../lib/stats');
 /* UDP Datagram route */
 exports.create = function (message, remote) {
-  try{
-    message = JSON.parse(message);
-  }catch(err){
-    console.log("Error parsing UDP Datagram: " + err);
-    console.log(message);
-  }
-  
   stats.create(message, function(err, createRes){
-    // UDP is fire & forget
+    // UDP is fire & forget - can't return errors here
     if (err){
       console.log('Error creating stat: ' + err);
     }

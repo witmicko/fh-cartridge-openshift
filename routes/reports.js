@@ -21,7 +21,7 @@ function listReports(req, res){
 function createReport(req, res){
   var report = req.body;
   
-  report.topic = req.param('topic');
+  report.topic = req.params.topic;
   reports.create(report, function(err, createResult){
     if (err){
       return res.status(500).json(err);
