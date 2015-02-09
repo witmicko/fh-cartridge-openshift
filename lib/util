@@ -43,7 +43,7 @@ function node_bin() {
 # Need to combine double slashes in case our PATH contains them
 #
 function node_pids() {
-  ps -u $(id -u) -o pid= -o cmd= | grep -e '[0-9]\{1,\}\snode\s' | sed -e 's#//#/#g'
+  ps -u $(id -u) -o pid= -o cmd= | grep -e '[0-9]\{1,\}\s./fhnodejs\s' | sed -e 's#//#/#g'
 }
 
 # Only PIDs with node running supervisor

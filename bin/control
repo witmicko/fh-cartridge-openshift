@@ -24,7 +24,7 @@ function start() {
     return 0
   fi
   
-  ./fhnodejs "${OPENSHIFT_FEEDHENRY_DIR}"/server.js &
+  ./fhnodejs "${OPENSHIFT_FEEDHENRY_DIR}"/server.js |& /usr/bin/logshifter -tag feedhenry_cartridge &
 
   retries=3
   while [ $retries -gt 0 ]; do
@@ -40,14 +40,18 @@ function start() {
   
   if [ -n "${cart_pid}" ]; then
       echo "$cart_pid" > "$OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid"
+      notify "DYNOMAN_DYNO_START_SUCCEEDED";
   else
       echo "FeedHenry reporter for '$OPENSHIFT_APP_NAME' failed to start" 1>&2 1
-      # This CURL will likely fail.. Better option here?
-      notify "DYNOMAN_DYNO_START_SUCCEEDED";
   fi
 }
 
 function stop() {
+  echo "Not stopping FeedHenry cartridge - use force stop to kill"
+  notify "DYNOMAN_DYNO_STOP_SUCCEEDED";
+}
+
+function force_stop() {
     echo "Stopping FeedHenry cartridge"
 
     if cartridge_pidfile_exists; then
@@ -83,7 +87,6 @@ function stop() {
           pkill -f "${node}" 2>&1 || :
         fi
       fi
-      notify "DYNOMAN_DYNO_STOP_SUCCEEDED";
     else
       if [ -n "$(cartridge_pid)" ]; then
         echo "Warning: FeedHenry reporter exists without a pid file.  Use force-stop to kill."
@@ -92,7 +95,7 @@ function stop() {
 }
 
 function restart() {
-  if (stop); then
+  if (force_stop); then
     start
   else
     start
