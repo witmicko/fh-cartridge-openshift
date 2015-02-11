@@ -16,6 +16,7 @@ udpserver.on('message', routes.stats.create);
 // Authenticated & external routes
 app.use(auth);
 app.use('/sys/reporter/logs', routes.logs);
+app.use('/sys/reporter/resources', routes.resources);
 
 // Bind the TCP and UDP listeners
 app.listen(process.env.OPENSHIFT_FEEDHENRY_REPORTER_PORT, process.env.OPENSHIFT_FEEDHENRY_REPORTER_IP);
