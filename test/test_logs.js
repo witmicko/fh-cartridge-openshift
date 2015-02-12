@@ -36,7 +36,7 @@ exports.it_should_remove_a_log_file = function(finish){
       }
     }
   });
-  mockLogs.remove('deletemetest.log', function(err){
+  mockLogs.deleteFile('deletemetest.log', function(err){
     assert.ok(!err, err);
     finish();
   });
