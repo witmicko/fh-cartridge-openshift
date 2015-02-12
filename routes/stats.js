@@ -4,7 +4,7 @@ exports.create = function (message, remote) {
   stats.create(message, function(err, createRes){
     // UDP is fire & forget - can't return errors here
     if (err){
-      console.log('Error creating stat: ' + err);
+      logger.error('Error creating stat: ' + err);
     }
   });
 };
