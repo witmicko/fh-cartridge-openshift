@@ -2,8 +2,8 @@
 
 # Source utility functions.
 source $OPENSHIFT_CARTRIDGE_SDK_BASH
-source "${OPENSHIFT_FEEDHENRY_DIR}/lib/util"
-source "${OPENSHIFT_FEEDHENRY_DIR}/lib/nodejs_context"
+source "${OPENSHIFT_FEEDHENRY_DIR}/bin/util"
+source "${OPENSHIFT_FEEDHENRY_DIR}/bin/nodejs_context"
 
 STOPTIMEOUT=10
 FMT="%a %b %d %Y %H:%M:%S GMT%z (%Z)"

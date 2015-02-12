@@ -3,6 +3,7 @@ var express = require('express');
 var logsRoute = new express.Router();
 var bodyParser = require('body-parser');
 var cors = require('cors');
+
 logsRoute.use(cors());
 logsRoute.use(bodyParser());
 logsRoute.get('/', function(req, res){
@@ -23,4 +24,13 @@ logsRoute.get('/:filename', function(req, res){
   });
 });
 
-module.exports = logsRoute
+logsRoute['delete']('/:filename', function(req, res){
+  logs.deleteFile(req.params.filename, function(err, deleteResult){
+    if (err){
+      return res.status(500).json(err);
+    }
+    return res.json(deleteResult);
+  });
+});
+
+module.exports = logsRoute;
