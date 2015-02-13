@@ -47,11 +47,6 @@ function start() {
 }
 
 function stop() {
-  echo "Not stopping FeedHenry cartridge - use force stop to kill"
-  notify "DYNOMAN_DYNO_STOP_SUCCEEDED";
-}
-
-function force_stop() {
     echo "Stopping FeedHenry cartridge"
 
     if cartridge_pidfile_exists; then
@@ -95,7 +90,7 @@ function force_stop() {
 }
 
 function restart() {
-  if (force_stop); then
+  if (stop); then
     start
   else
     start
