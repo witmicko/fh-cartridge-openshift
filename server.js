@@ -42,3 +42,13 @@ setInterval(function(){
     logger.debug('Report sent OK - waiting ' + reportingInterval)
   });
 }, reportingInterval);
+
+process.on('SIGTERM', function(){
+  // try once to flush before quitting
+  reportingAgent(function(err){
+    if (err){
+      return logger.error('Failed to flush reports - exiting anyway');
+    }
+    logger.info('Successfully flushed reports - exiting');
+  });
+});
