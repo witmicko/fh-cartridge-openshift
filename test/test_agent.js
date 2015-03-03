@@ -42,7 +42,9 @@ exports.it_should_deflush_on_failure = function(finish){
   var errAgent = proxyquire('../lib/agent.js', {
     './stats' : stats,
     'request' : function(opts, cb){
-      return cb({err : true});
+      process.nextTick(function(){
+        return cb({err : true});  
+      });
     }
   })
   errAgent(function(err){

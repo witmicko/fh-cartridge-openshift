@@ -97,12 +97,6 @@ function restart() {
   fi
 }
 
-function build() {
-    echo
-}
-
-
-
 function post-deploy() {
     echo
 }
@@ -144,7 +138,6 @@ case "$1" in
     restart|graceful)    restart     ;;
     graceful-stop|stop)  stop        ;;
     status)              status      ;;
-    build)               build       ;;
     post-deploy)         post-deploy ;;
     tidy)                tidy        ;;
     pre-repo-archive)    pre-repo-archive ;;
