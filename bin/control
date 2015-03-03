@@ -40,9 +40,14 @@ function start() {
   
   if [ -n "${cart_pid}" ]; then
       echo "$cart_pid" > "$OPENSHIFT_FEEDHENRY_PID_DIR/cartridge.pid"
-      notify "DYNOMAN_DYNO_START_SUCCEEDED";
+      
   else
       echo "FeedHenry reporter for '$OPENSHIFT_APP_NAME' failed to start" 1>&2 1
+  fi
+  
+  # Only if the node cartridge is running do we notify
+  if [ -f "$OPENSHIFT_NODEJS_PID_DIR/cartridge.pid" ]; then 
+    notify "DYNOMAN_DYNO_START_SUCCEEDED";
   fi
 }
 
