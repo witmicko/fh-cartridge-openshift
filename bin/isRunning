@@ -1,0 +1,9 @@
+source "${OPENSHIFT_FEEDHENRY_DIR}/bin/util"
+
+sleep 10
+# Only if the node cartridge is running do we notify
+if [ -f "$OPENSHIFT_NODEJS_PID_DIR/cartridge.pid" ]; then
+  echo notifying
+  notify "DYNOMAN_DYNO_START_SUCCEEDED";
+fi
+exit 0

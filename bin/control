@@ -46,9 +46,9 @@ function start() {
   fi
   
   # Only if the node cartridge is running do we notify
-  if [ -f "$OPENSHIFT_NODEJS_PID_DIR/cartridge.pid" ]; then 
-    notify "DYNOMAN_DYNO_START_SUCCEEDED";
-  fi
+  # We spawn an async separate bash process to sleep then check this
+  /bin/bash ${OPENSHIFT_FEEDHENRY_DIR}bin/isRunning &
+  echo "backgrounded"
 }
 
 function stop() {
@@ -120,11 +120,8 @@ function pre-repo-archive() {
 
 
 function tidy() {
-    echo
-}
-
-function notify(){
-  curl "http://$OPENSHIFT_FEEDHENRY_REPORTER_IP:$OPENSHIFT_FEEDHENRY_REPORTER_PORT/sys/admin/notifications" -H "X-FH-AUTH-APP: $FH_APP_API_KEY" -H 'Content-Type: application/json' --data-binary $"{ \"type\" : \"$1\"}"
+  client_message "Emptying FeedHenry logs in dir: $OPENSHIFT_LOG_DIR"
+  rm -rf $OPENSHIFT_LOG_DIR/feedhenry_cartridge.log*
 }
 
 #
