@@ -3,14 +3,17 @@ routes = require('./routes/index'),
 app = express(),
 dgram = require('dgram'),
 auth = require('./lib/auth'),
-reportingAgent = require('./lib/agent'),
+reportingInterval = process.env.FH_REPORTING_INTERVAL || 10000,
 udpserver = dgram.createSocket('udp4'),
 logger = require('./lib/logger'),
-reportingInterval = process.env.FH_REPORTING_INTERVAL || 10000;
+notifications = require('./lib/notifications'),
+reportingAgent;
 
 if (typeof reportingInterval === 'string'){
   reportingInterval = parseInt(reportingInterval);
 }
+
+reportingAgent = require('./lib/agent')({ reportingInterval : reportingInterval });
 
 // Internal routes only
 app.use('/sys/admin/reports', routes.reports);
@@ -43,12 +46,20 @@ setInterval(function(){
   });
 }, reportingInterval);
 
+// Poll for verification that the node.js app has started
+notifications.checkStarted();
+
+// try once to flush before quitting
 process.on('SIGTERM', function(){
-  // try once to flush before quitting
+  notifications.checkStopped();
   reportingAgent(function(err){
     if (err){
-      return logger.error('Failed to flush reports - exiting anyway');
+      logger.error('Failed to flush reports - exiting anyway');
+      return process.exit(1);
+    }else{
+      logger.info('Successfully flushed reports - exiting');  
+      return process.exit(1);
     }
-    logger.info('Successfully flushed reports - exiting');
+    
   });
 });

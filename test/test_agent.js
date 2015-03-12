@@ -10,7 +10,7 @@ agent = proxyquire('../lib/agent.js', {
     assert.ok(opts.json.stats.length === 2);
     return cb(null, {statusCode : 200}, { ok : true });
   }
-});
+})({ reportingInterval : 10000 });
 
 exports.it_should_return_instantly_on_no_events = function(finish){
   var d1 = new Date().getTime();
@@ -46,7 +46,7 @@ exports.it_should_deflush_on_failure = function(finish){
         return cb({err : true});  
       });
     }
-  })
+  })({ reportingInterval : 10000 });
   errAgent(function(err){
     assert.ok(err);
     stats.list(function(err, statsList){

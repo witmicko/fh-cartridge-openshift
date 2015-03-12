@@ -45,10 +45,6 @@ function start() {
       echo "FeedHenry reporter for '$OPENSHIFT_APP_NAME' failed to start" 1>&2 1
   fi
   
-  # Only if the node cartridge is running do we notify
-  # We spawn an async separate bash process to sleep then check this
-  /bin/bash ${OPENSHIFT_FEEDHENRY_DIR}bin/isRunning &
-  echo "backgrounded"
 }
 
 function stop() {
